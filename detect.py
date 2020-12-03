@@ -39,14 +39,6 @@ def angle_with_x_axis(i, j):
 
 
 def superm2(image):
-    """Performs the symmetry detection on image.
-    Somewhat clunky at the moment -- first you 
-    must comment out the last two lines: the 
-    call to `draw` and `cv2.imshow` and uncomment
-    `hex` call. This will show a 3d histogram, where
-    bright orange/red is the maximum (most voted for
-    line of symmetry). Manually get the coordinates,
-    and re-run but this time uncomment draw/imshow."""
     mimage = np.fliplr(image)
     kp1, des1 = sift.detectAndCompute(image, None)
     kp2, des2 = sift.detectAndCompute(mimage, None)
@@ -100,17 +92,24 @@ def superm2(image):
                 x = int((r - y * np.sin(theta)) / np.cos(theta))
                 if 0 <= x < len(image[y]):
                     image[y][x] = 255
-
+    print(houghr)
+    print(houghth)
     img3 = cv2.drawMatches(image, kp1, mimage, kp2, good[:15], None, flags=2)
-    # print(*(m.distance for m in matches[:10]))
-    # cv2.imshow('a',img3); cv2.waitKey(0);
-    def hex():
-        plt.hexbin(houghr, houghth, bins=200)
-        plt.show()
 
-    hex()
+    def hex():
+        polys = plt.hexbin(houghr, houghth, bins=200, gridsize=image.shape[1])
+        # plt.colorbar()
+        # plt.show()
+        hvals = polys.get_array()
+        hcoords = polys.get_offsets()
+        return hcoords[hvals.argmax()]
+
+
+    best_coords = hex()
+    print(best_coords)
     # draw(2.8, 2.4)
-    # cv2.imshow('a', image); cv2.waitKey(0);
+    draw(*best_coords)
+    cv2.imshow('a', image); cv2.waitKey(0);
 
 
 def draw(image, r, theta):
